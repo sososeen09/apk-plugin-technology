@@ -15,13 +15,44 @@ buildscript {
     }
 }
 
+def pluginApkPath = '/sdcard/apk_plugin_dir'
 allprojects {
     repositories {
         google()
         jcenter()
     }
+
+    def upload = { ->
+        try {
+            exec {
+                commandLine project.android.adbExe, 'shell', 'mkdir', pluginApkPath
+            }
+        }
+        catch (ignored) {
+        }
+
+        try {
+            exec {
+                workingDir project.projectDir.toString() + '/build/outputs/apk/debug/'
+                commandLine project.android.adbExe, 'push', workingDir.toString() + project.name + '-debug.apk', pluginApkPath
+                logger.quiet("project dir: " + project.projectDir.toString())
+            }
+        }
+        catch (ignored) {
+        }
+
+    }
+
+    task uploadDebug << {
+        upload()
+    }
 }
+
 
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+//task buildLib (type: Jar, dependsOn:'compileReleaseJava') {
+//    from (project.buildDir.toString()+'/intermediates/classes/release')
+//}

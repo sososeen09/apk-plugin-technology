@@ -1,1 +1,1 @@
-include ':app', ':plugin-a', ':plugin-lib'
+include ':app', ':plugin-a', ':plugin-lib', ':apk-upload-help-plugin', ':gradle-plugin-source-lib'

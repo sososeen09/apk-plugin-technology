@@ -2,6 +2,32 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
+
+
+apply plugin: "apk.upload.plugin"
+
+buildscript {
+    repositories {
+
+        maven{
+            url 'file:../repositories'
+        }
+//        maven{
+//            url 'file:/works/StudioWorkSpace/Personal/apk-plugin-technology/repositories'
+//        }
+    }
+
+    dependencies {
+        classpath 'com.sososeen09:apk-upload-help-plugin:1.0'
+    }
+}
+
+pluginApkOutputPath{
+    path ="sdcard/apk_plugin_dir"
+}
+
+
+
 android {
     compileSdkVersion 26
 
@@ -26,6 +52,8 @@ android {
     }
 
 }
+
+
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
