@@ -22,8 +22,6 @@
         <activity android:name=".ProxyActivity">
         </activity>
 
-        <activity android:name=".PluginApkListActivity"/>
-
         <service
             android:name=".ProxyService"
             android:enabled="true"

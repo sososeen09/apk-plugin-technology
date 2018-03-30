@@ -86,7 +86,7 @@ class MainActivity : Activity() {
     private class PluginAdapter(val data: List<PluginItem>, val context: Context) : RecyclerView.Adapter<Holder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.plugin_item, parent, false)
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_plugin_apk, parent, false)
             return Holder(view)
         }
 
