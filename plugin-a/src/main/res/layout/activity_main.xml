@@ -20,4 +20,22 @@
         android:layout_marginTop="20dp"
         android:text="to Second"/>
 
+    <Button
+        android:id="@+id/btn_resister"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAllCaps="false"
+        android:layout_marginTop="20dp"
+        android:text="register broadcast receiver"/>
+
+        <Button
+        android:id="@+id/btn_send_broadcast"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAllCaps="false"
+        android:layout_marginTop="20dp"
+        android:text="send_broadcast"/>
+
+
+
 </LinearLayout>

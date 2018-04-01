@@ -1,8 +1,10 @@
 package com.sososeen09.apk.plugin.sample
 
 import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.Resources
 import android.os.Bundle
 import com.sososeen09.plugin.lib.PluginActivityInterface
@@ -75,6 +77,20 @@ class ProxyActivity : Activity() {
         val delegateIntent = Intent(this, ProxyService::class.java)
         delegateIntent.putExtra("serviceName", service.component.className)
         return super.startService(delegateIntent)
+    }
+
+    override fun registerReceiver(receiver: BroadcastReceiver, filter: IntentFilter): Intent? {
+        val proxyReveiver = ProxyReceiver(receiver.javaClass.name, this)
+        val proxyFilter = IntentFilter()
+
+        filter.actionsIterator()?.forEach {
+            proxyFilter.addAction(it)
+        }
+        return super.registerReceiver(proxyReveiver, proxyFilter)
+    }
+
+    override fun sendBroadcast(intent: Intent?) {
+        super.sendBroadcast(intent)
     }
 
 }

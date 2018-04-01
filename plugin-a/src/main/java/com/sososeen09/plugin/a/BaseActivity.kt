@@ -1,8 +1,10 @@
 package com.sososeen09.plugin.a
 
 import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.LayoutInflater
@@ -122,6 +124,23 @@ open class BaseActivity : Activity(), PluginActivityInterface {
             super.findViewById<T>(id)
         } else {
             that!!.findViewById<T>(id)
+        }
+    }
+
+
+    override fun registerReceiver(receiver: BroadcastReceiver, filter: IntentFilter): Intent? {
+        return if (that == null) {
+            super.registerReceiver(receiver, filter)
+        } else {
+            that!!.registerReceiver(receiver, filter)
+        }
+    }
+
+    override fun sendBroadcast(intent: Intent?) {
+        if (that == null) {
+            super.sendBroadcast(intent)
+        } else {
+            that!!.sendBroadcast(intent)
         }
     }
 }
