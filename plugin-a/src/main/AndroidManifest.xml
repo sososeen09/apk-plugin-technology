@@ -24,6 +24,12 @@
             android:enabled="true"
             android:exported="true">
         </service>
+
+        <receiver android:name=".StaticBroadcastReceiver">
+            <intent-filter>
+                <action android:name="com.sososeen09.plugin.apk.static.receiver"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

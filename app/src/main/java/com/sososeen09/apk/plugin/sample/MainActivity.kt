@@ -3,8 +3,10 @@ package com.sososeen09.apk.plugin.sample
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageInfo
 import android.os.Bundle
 import android.os.Environment
@@ -16,14 +18,28 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import com.sososeen09.plugin.lib.PackageUtils
 import com.sososeen09.plugin.lib.showToast
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 
 class MainActivity : Activity() {
+    companion object {
+        const val ACTION_DYNAMIC: String = "com.sososeen09.plugin.apk.dynamic"
+        const val ACTION_STATIC: String = "com.sososeen09.plugin.apk.static.receiver"
+        const val ACTION_HOST: String = "com.sososeen09.plugin.apk.host.action"
 
-    private lateinit var pluginAdapter :PluginAdapter
+    }
+
+    private lateinit var pluginAdapter: PluginAdapter
+
+    var mReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            Toast.makeText(context, " host receiver get msg: " + intent.getStringExtra("msg"), Toast.LENGTH_SHORT).show()
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +52,10 @@ class MainActivity : Activity() {
         rv_plugin_apk.adapter = pluginAdapter
 
         PluginManager.init(this)
+
+
+        registerReceiver(mReceiver, IntentFilter(ACTION_HOST))
+
     }
 
     private fun getData(): List<PluginItem> {
@@ -80,6 +100,12 @@ class MainActivity : Activity() {
         val intent = Intent(this, ProxyActivity::class.java)
         intent.putExtra("className", PluginManager.getInstance().getPackageInfo()?.activities?.get(0)?.name ?: "")
         startActivity(intent)
+    }
+
+    fun sendBroadcast(view: View) {
+        val staticIntent = Intent(ACTION_STATIC)
+        staticIntent.putExtra("msg", "from host mainActivity")
+        sendBroadcast(staticIntent)
     }
 
 

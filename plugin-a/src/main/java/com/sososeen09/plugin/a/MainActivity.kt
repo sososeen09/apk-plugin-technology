@@ -11,7 +11,8 @@ import android.widget.Button
 class MainActivity : BaseActivity() {
 
     companion object {
-        const val ACTION_BROAD_CAST: String = "com.sososeen09.plugin.apk.dynamic"
+        const val ACTION_DYNAMIC: String = "com.sososeen09.plugin.apk.dynamic"
+        const val ACTION_STATIC: String = "com.sososeen09.plugin.apk.static.receiver"
 
     }
 
@@ -28,13 +29,17 @@ class MainActivity : BaseActivity() {
 
         findViewById<Button>(R.id.btn_resister).setOnClickListener {
             //注册广播
-            val intentFilter = IntentFilter(ACTION_BROAD_CAST)
+            val intentFilter = IntentFilter(ACTION_DYNAMIC)
             registerReceiver(DynamicBroadcastReceiver(), intentFilter)
         }
 
         findViewById<Button>(R.id.btn_send_broadcast).setOnClickListener {
-            val broadcastIntent = Intent(ACTION_BROAD_CAST)
-            sendBroadcast(broadcastIntent)
+            val dynamicIntent = Intent(ACTION_DYNAMIC)
+            sendBroadcast(dynamicIntent)
+
+            val staticIntent = Intent(ACTION_STATIC)
+            staticIntent.putExtra("msg", "from mainActivity")
+            sendBroadcast(staticIntent)
         }
     }
 }
