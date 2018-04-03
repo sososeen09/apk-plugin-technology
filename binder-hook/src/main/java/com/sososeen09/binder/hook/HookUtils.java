@@ -27,40 +27,48 @@ public class HookUtils {
     public static final int LAUNCH_ACTIVITY = 100;
     public static final String MREAL_WANTED_INTENT = "real_wanted_intent";
 
-    public void attach(Context context) {
+    public void initHook(Context context) {
         this.context = context;
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
-            try {
-                // 反射获取ActivityManagerNative的静态成员变量gDefault
-                // 注意，在8.0的时候这个已经更改了
-                Class<?> activityManagerNativeClass = Class.forName("android.app.ActivityManagerNative");
-                Field gDefaultField = activityManagerNativeClass.getDeclaredField("gDefault");
-                gDefaultField.setAccessible(true);
-                Object gDefaultObj = gDefaultField.get(null);
-
-
-                Class<?> singletonClass = Class.forName("android.util.Singleton");
-                Field mInstanceField = singletonClass.getDeclaredField("mInstance");
-                mInstanceField.setAccessible(true);
-
-                Object instanceObj = mInstanceField.get(gDefaultObj);
-
-                //需要动态代理IActivityManager
-                Class<?> iActivityManagerClass = Class.forName("android.app.IActivityManager");
-
-                //但是有一点，我们不可能完全重写一个IActivityManager的实现类，所以还是需要用到原始的IActivityManager对象，只是在调用某些方法的时候做一些手脚
-                InterceptInvocationHandler interceptInvocationHandler = new InterceptInvocationHandler(instanceObj);
-
-                Object iActivityManangerObj = Proxy.newProxyInstance(context.getClassLoader(), new Class[]{iActivityManagerClass}, interceptInvocationHandler);
-
-                //把Singleton的成员变量mInstance的值设置为我们的这个动态代理对象
-                mInstanceField.set(gDefaultObj, iActivityManangerObj);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return;
         }
 
+        hookStartActivity(context);
+        hookActivityThreadHandler();
+    }
+
+    private void hookStartActivity(Context context) {
+        try {
+            // 反射获取ActivityManagerNative的静态成员变量gDefault
+            // 注意，在8.0的时候这个已经更改了
+            Class<?> activityManagerNativeClass = Class.forName("android.app.ActivityManagerNative");
+            Field gDefaultField = activityManagerNativeClass.getDeclaredField("gDefault");
+            gDefaultField.setAccessible(true);
+            Object gDefaultObj = gDefaultField.get(null);
+
+
+            // ActivityManagerNative.getDefault()方法在ActivityThread调用attach方法初始化的时候已经调用过，
+            // 所以我们在这里拿到的instanceObj对象不为空，如果为空的话就没办法使用
+            Class<?> singletonClass = Class.forName("android.util.Singleton");
+            Field mInstanceField = singletonClass.getDeclaredField("mInstance");
+            mInstanceField.setAccessible(true);
+
+            Object instanceObj = mInstanceField.get(gDefaultObj);
+
+            // 需要动态代理IActivityManager，把Singleton的成员变量mInstance的值设置为我们的这个动态代理对象
+            // 但是有一点，我们不可能完全重写一个IActivityManager的实现类
+            // 所以还是需要用到原始的IActivityManager对象，只是在调用某些方法的时候做一些手脚
+            Class<?> iActivityManagerClass = Class.forName("android.app.IActivityManager");
+            InterceptInvocationHandler interceptInvocationHandler = new InterceptInvocationHandler(instanceObj);
+            Object iActivityManagerObj = Proxy.newProxyInstance(context.getClassLoader(), new Class[]{iActivityManagerClass}, interceptInvocationHandler);
+            mInstanceField.set(gDefaultObj, iActivityManagerObj);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void hookActivityThreadHandler() {
         //需要hook ActivityThread
         try {
             //获取ActivityThread的成员变量 sCurrentActivityThread
@@ -99,8 +107,8 @@ public class HookUtils {
                 handleLaunchActivity(msg);
             }
 
-            mH.handleMessage(msg);
-            return true;
+//            mH.handleMessage(msg);
+            return false;
         }
 
         private void handleLaunchActivity(Message msg) {

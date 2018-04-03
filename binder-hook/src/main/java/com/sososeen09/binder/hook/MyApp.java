@@ -14,6 +14,6 @@ public class MyApp extends Application {
         super.onCreate();
         SPHelper.init(this);
         HookUtils hookUtils = new HookUtils();
-        hookUtils.attach(this);
+        hookUtils.initHook(this);
     }
 }
