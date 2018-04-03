@@ -21,23 +21,39 @@ import java.lang.reflect.Proxy;
 
 public class HookUtils {
 
-    private static String METHOD_START_ACTIVITY = "startActivity";
-    private Context context;
+    private static final String METHOD_START_ACTIVITY = "startActivity";
+    public static final String EXTRA_REAL_WANTED_INTENT = "real_wanted_intent";
+    private static final int LAUNCH_ACTIVITY = 100;
 
-    public static final int LAUNCH_ACTIVITY = 100;
-    public static final String MREAL_WANTED_INTENT = "real_wanted_intent";
+    private Context context;
 
     public void initHook(Context context) {
         this.context = context;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            hookActivityManagerApi26();
+        } else {
+            hookActivityManagerApi25();
         }
 
-        hookStartActivity(context);
         hookActivityThreadHandler();
     }
 
-    private void hookStartActivity(Context context) {
+
+    private void hookActivityManagerApi26() {
+        try {
+            // 反射获取ActivityManager的静态成员变量IActivityManagerSingleton,适配8.0
+            Class<?> activityManagerNativeClass = Class.forName("android.app.ActivityManager");
+            Field iActivityManagerSingletonField = activityManagerNativeClass.getDeclaredField("IActivityManagerSingleton");
+            iActivityManagerSingletonField.setAccessible(true);
+            Object iActivityManagerSingleton = iActivityManagerSingletonField.get(null);
+            realHookActivityManager(iActivityManagerSingleton);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void hookActivityManagerApi25() {
         try {
             // 反射获取ActivityManagerNative的静态成员变量gDefault
             // 注意，在8.0的时候这个已经更改了
@@ -45,27 +61,29 @@ public class HookUtils {
             Field gDefaultField = activityManagerNativeClass.getDeclaredField("gDefault");
             gDefaultField.setAccessible(true);
             Object gDefaultObj = gDefaultField.get(null);
-
-
-            // ActivityManagerNative.getDefault()方法在ActivityThread调用attach方法初始化的时候已经调用过，
-            // 所以我们在这里拿到的instanceObj对象不为空，如果为空的话就没办法使用
-            Class<?> singletonClass = Class.forName("android.util.Singleton");
-            Field mInstanceField = singletonClass.getDeclaredField("mInstance");
-            mInstanceField.setAccessible(true);
-
-            Object instanceObj = mInstanceField.get(gDefaultObj);
-
-            // 需要动态代理IActivityManager，把Singleton的成员变量mInstance的值设置为我们的这个动态代理对象
-            // 但是有一点，我们不可能完全重写一个IActivityManager的实现类
-            // 所以还是需要用到原始的IActivityManager对象，只是在调用某些方法的时候做一些手脚
-            Class<?> iActivityManagerClass = Class.forName("android.app.IActivityManager");
-            InterceptInvocationHandler interceptInvocationHandler = new InterceptInvocationHandler(instanceObj);
-            Object iActivityManagerObj = Proxy.newProxyInstance(context.getClassLoader(), new Class[]{iActivityManagerClass}, interceptInvocationHandler);
-            mInstanceField.set(gDefaultObj, iActivityManagerObj);
+            realHookActivityManager(gDefaultObj);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void realHookActivityManager(Object iActivityManagerSingleton) throws IllegalAccessException, ClassNotFoundException, NoSuchFieldException {
+        // ActivityManagerNative.getDefault()方法在ActivityThread调用attach方法初始化的时候已经调用过，
+        // 所以我们在这里拿到的instanceObj对象不为空，如果为空的话就没办法使用
+        Class<?> singletonClass = Class.forName("android.util.Singleton");
+        Field mInstanceField = singletonClass.getDeclaredField("mInstance");
+        mInstanceField.setAccessible(true);
+
+        Object instanceObj = mInstanceField.get(iActivityManagerSingleton);
+
+        // 需要动态代理IActivityManager，把Singleton的成员变量mInstance的值设置为我们的这个动态代理对象
+        // 但是有一点，我们不可能完全重写一个IActivityManager的实现类
+        // 所以还是需要用到原始的IActivityManager对象，只是在调用某些方法的时候做一些手脚
+        Class<?> iActivityManagerClass = Class.forName("android.app.IActivityManager");
+        InterceptInvocationHandler interceptInvocationHandler = new InterceptInvocationHandler(instanceObj);
+        Object iActivityManagerObj = Proxy.newProxyInstance(context.getClassLoader(), new Class[]{iActivityManagerClass}, interceptInvocationHandler);
+        mInstanceField.set(iActivityManagerSingleton, iActivityManagerObj);
     }
 
     private void hookActivityThreadHandler() {
@@ -121,7 +139,7 @@ public class HookUtils {
                 Intent interceptedIntent = (Intent) intentField.get(activityClientRecord);
 
                 //真正想要跳转的 SecondActivity
-                Intent realWanted = interceptedIntent.getParcelableExtra(MREAL_WANTED_INTENT);
+                Intent realWanted = interceptedIntent.getParcelableExtra(EXTRA_REAL_WANTED_INTENT);
                 if (realWanted != null) {
                     //如果不需要登录
                     Class<?> real = Class.forName(realWanted.getComponent().getClassName());
@@ -130,7 +148,7 @@ public class HookUtils {
                     if (annotation != null && !SPHelper.getBoolean("login", false)) {
                         //如果需要登录并且没有登录，跳转登录页面
                         Intent loginIntent = new Intent(context, LoginActivity.class);
-                        loginIntent.putExtra(MREAL_WANTED_INTENT, realWanted);
+                        loginIntent.putExtra(EXTRA_REAL_WANTED_INTENT, realWanted);
                         interceptedIntent.setComponent(loginIntent.getComponent());
                     } else {
                         interceptedIntent.setComponent(realWanted.getComponent());
@@ -173,7 +191,7 @@ public class HookUtils {
 
                         //把原始的跳转信息当作参数携带给代理类
 
-                        newIntent.putExtra(MREAL_WANTED_INTENT, wantedIntent);
+                        newIntent.putExtra(EXTRA_REAL_WANTED_INTENT, wantedIntent);
                         index = i;
                     }
                 }

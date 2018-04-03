@@ -26,7 +26,7 @@ public class LoginActivity extends AppCompatActivity {
         tvOrigin = findViewById(R.id.tv_origin_target);
         username = findViewById(R.id.et_name);
         password = findViewById(R.id.et_password);
-        Intent realWantedIntent = getIntent().getParcelableExtra(HookUtils.MREAL_WANTED_INTENT);
+        Intent realWantedIntent = getIntent().getParcelableExtra(HookUtils.EXTRA_REAL_WANTED_INTENT);
 
         if (realWantedIntent != null) {
             mClassName = realWantedIntent.getComponent().getClassName();
