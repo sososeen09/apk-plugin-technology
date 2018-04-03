@@ -3,6 +3,7 @@ package com.sososeen09.binder.hook;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
@@ -22,6 +23,7 @@ import java.lang.reflect.Proxy;
 public class HookUtils {
 
     private static final String METHOD_START_ACTIVITY = "startActivity";
+    public static final String METHOD_GET_ACTIVITY_INFO = "getActivityInfo";
     public static final String EXTRA_REAL_WANTED_INTENT = "real_wanted_intent";
     private static final int LAUNCH_ACTIVITY = 100;
 
@@ -31,11 +33,34 @@ public class HookUtils {
         this.context = context;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             hookActivityManagerApi26();
+
         } else {
             hookActivityManagerApi25();
         }
 
+        HookPackageManager();
         hookActivityThreadHandler();
+    }
+
+    private void HookPackageManager() {
+        //需要hook ActivityThread
+        try {
+            //获取ActivityThread的成员变量 sCurrentActivityThread
+            Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
+            Field sPackageManagerField = activityThreadClass.getDeclaredField("sPackageManager");
+            sPackageManagerField.setAccessible(true);
+            Object iPackageManagerObj = sPackageManagerField.get(null);
+
+
+            Class<?> iPackageManagerClass = Class.forName("android.content.pm.IPackageManager");
+            InterceptPackageManagenHandler interceptInvocationHandler = new InterceptPackageManagenHandler(iPackageManagerObj);
+            Object iPackageManagerObjProxy = Proxy.newProxyInstance(context.getClassLoader(), new Class[]{iPackageManagerClass}, interceptInvocationHandler);
+
+            sPackageManagerField.set(null,iPackageManagerObjProxy);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -55,8 +80,7 @@ public class HookUtils {
 
     private void hookActivityManagerApi25() {
         try {
-            // 反射获取ActivityManagerNative的静态成员变量gDefault
-            // 注意，在8.0的时候这个已经更改了
+            // 反射获取ActivityManagerNative的静态成员变量gDefault, 注意，在8.0的时候这个已经更改了
             Class<?> activityManagerNativeClass = Class.forName("android.app.ActivityManagerNative");
             Field gDefaultField = activityManagerNativeClass.getDeclaredField("gDefault");
             gDefaultField.setAccessible(true);
@@ -119,8 +143,10 @@ public class HookUtils {
 
         @Override
         public boolean handleMessage(Message msg) {
-            //跳转过程中发现如果被跳转的Activity继承自AppCompatActivity会报异常android.content.pm.PackageManager$NameNotFoundException:
-            //这是因为AppCompatActivity在onCreate方法中会调用NavUtils.getParentActivityName方法，在这个方法中PackageManager会调用getActivityInfo
+            // 跳转过程中发现如果被跳转的Activity继承自AppCompatActivity会报异常android.content.pm.PackageManager$NameNotFoundException:
+            // 这是因为被跳转的Activity没有在AndroidManifest.xml中注册
+            // 而AppCompatActivity在onCreate方法中会调用NavUtils.getParentActivityName方法，在这个方法中PackageManager会调用getActivityInfo
+            // 实际上会再检查一次Activity的合法性
             if (msg.what == LAUNCH_ACTIVITY) {
                 handleLaunchActivity(msg);
             }
@@ -203,4 +229,19 @@ public class HookUtils {
     }
 
 
+    private class InterceptPackageManagenHandler  implements InvocationHandler {
+        Object originalObject;
+
+        public InterceptPackageManagenHandler(Object originalObject) {
+            this.originalObject = originalObject;
+        }
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            if (METHOD_GET_ACTIVITY_INFO.equals(method.getName())) {
+                return new ActivityInfo();
+            }
+            return method.invoke(originalObject,args);
+        }
+    }
 }
