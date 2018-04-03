@@ -7,14 +7,15 @@ import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
+import com.sososeen09.binder.hook.utils.LogUtils;
 import com.sososeen09.binder.hook.utils.SPHelper;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 
 /**
  * Created by yunlong.su on 2018/4/3.
@@ -53,10 +54,10 @@ public class HookUtils {
 
 
             Class<?> iPackageManagerClass = Class.forName("android.content.pm.IPackageManager");
-            InterceptPackageManagenHandler interceptInvocationHandler = new InterceptPackageManagenHandler(iPackageManagerObj);
+            InterceptPackageManagerHandler interceptInvocationHandler = new InterceptPackageManagerHandler(iPackageManagerObj);
             Object iPackageManagerObjProxy = Proxy.newProxyInstance(context.getClassLoader(), new Class[]{iPackageManagerClass}, interceptInvocationHandler);
 
-            sPackageManagerField.set(null,iPackageManagerObjProxy);
+            sPackageManagerField.set(null, iPackageManagerObjProxy);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -197,7 +198,7 @@ public class HookUtils {
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            Log.e("binder hook", "method invoke: " + method.getName());
+            LogUtils.d("method:" + method.getName() + " called with args:" + Arrays.toString(args));
             //如果是startActivity方法，需要做一些手脚
             if (METHOD_START_ACTIVITY.equals(method.getName())) {
                 Intent newIntent = null;
@@ -206,17 +207,14 @@ public class HookUtils {
                     Object arg = args[i];
                     if (arg instanceof Intent) {
                         Intent wantedIntent = (Intent) arg;
-                        //hook目标进入登录页面
-//                        newIntent = new Intent(context, LoginActivity.class);
-
-                        //加入目标Activity没有在清单文件中注册，我们就欺骗ActivityManagerService，启动一个代理页面
-                        // 真正启动页面，会开始回调ActivityThread的handleLaunchActivity方法，调用这个方法前可以做点文章，启动我们想要启动的页面
+                        // 加入目标Activity没有在清单文件中注册，我们就欺骗ActivityManagerService，启动一个代理页面
+                        // 真正启动页面，会开始回调ActivityThread的handleLaunchActivity方法
+                        // 调用这个方法前可以做点文章，启动我们想要启动的页面
                         newIntent = new Intent();
                         ComponentName componentName = new ComponentName(context, ProxyActivity.class);
                         newIntent.setComponent(componentName);
 
                         //把原始的跳转信息当作参数携带给代理类
-
                         newIntent.putExtra(EXTRA_REAL_WANTED_INTENT, wantedIntent);
                         index = i;
                     }
@@ -229,19 +227,20 @@ public class HookUtils {
     }
 
 
-    private class InterceptPackageManagenHandler  implements InvocationHandler {
+    private class InterceptPackageManagerHandler implements InvocationHandler {
         Object originalObject;
 
-        public InterceptPackageManagenHandler(Object originalObject) {
+        public InterceptPackageManagerHandler(Object originalObject) {
             this.originalObject = originalObject;
         }
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            LogUtils.d("method:" + method.getName() + " called with args:" + Arrays.toString(args));
             if (METHOD_GET_ACTIVITY_INFO.equals(method.getName())) {
                 return new ActivityInfo();
             }
-            return method.invoke(originalObject,args);
+            return method.invoke(originalObject, args);
         }
     }
 }
