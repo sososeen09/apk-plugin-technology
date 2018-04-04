@@ -1,7 +1,11 @@
 ### Android插件化技术总结
 
 
-### 相关插件地址
+### 插件化框架
 
-- [dynamic-load-apk](https://github.com/singwhatiwanna/dynamic-load-apk)
+- [dynamic-load-apk](https://github.com/singwhatiwanna/dynamic-load-apk) 
 - [VirtualAPK](https://github.com/didi/VirtualAPK)
+- [DroidPlugin](https://github.com/DroidPluginTeam/DroidPlugin)
+- [RePlugin](https://github.com/Qihoo360/RePlugin)
+- [Small](https://github.com/wequick/Small)
+- [atlas](https://github.com/alibaba/atlas)
