@@ -1,4 +1,4 @@
-package com.sososeen09.binder.hook;
+package com.sososeen09.binder.hook.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

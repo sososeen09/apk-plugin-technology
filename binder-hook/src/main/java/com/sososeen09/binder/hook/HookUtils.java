@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 
+import com.sososeen09.binder.hook.annotation.NeedLogin;
 import com.sososeen09.binder.hook.utils.LogUtils;
 import com.sososeen09.binder.hook.utils.SPHelper;
 
