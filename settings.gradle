@@ -1,1 +1,17 @@
-include ':app', ':plugin-a', ':plugin-lib', ':apk-upload-help-plugin', ':gradle-plugin-source-lib', ':binder-hook'
+include ':apk-upload-help-plugin', ':plugin-host', ':plugin-core_lib'
+include ':gradle-plugin-source-lib'
+include ':binder-hook'
+include ':plugin-demo'
+include ':app'
+include ':plugin-a'
+include ':plugin-lib'
+
+
+project(':app').projectDir = new File('instrument-plugin-test/app')
+project(':plugin-a').projectDir = new File('instrument-plugin-test/plugin-a')
+project(':plugin-lib').projectDir = new File('instrument-plugin-test/plugin-lib')
+
+project(':binder-hook').projectDir = new File('binder-hook-plugin-test/binder-hook')
+project(':plugin-demo').projectDir = new File('binder-hook-plugin-test/plugin-demo')
+project(':plugin-host').projectDir = new File('binder-hook-plugin-test/plugin-host')
+project(':plugin-core_lib').projectDir = new File('binder-hook-plugin-test/plugin-core_lib')
