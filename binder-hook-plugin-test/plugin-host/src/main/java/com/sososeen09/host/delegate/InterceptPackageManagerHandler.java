@@ -1,6 +1,7 @@
 package com.sososeen09.host.delegate;
 
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageInfo;
 
 import com.sososeen09.host.internal.Constants;
 import com.sososeen09.host.utils.LogUtils;
@@ -24,6 +25,8 @@ public class InterceptPackageManagerHandler implements InvocationHandler {
         LogUtils.d("method:" + method.getName() + " called with args:" + Arrays.toString(args));
         if (Constants.METHOD_GET_ACTIVITY_INFO.equals(method.getName())) {
             return new ActivityInfo();
+        } else if (Constants.METHOD_GET_PACKAGE_INFO.equals(method.getName())) {
+            return new PackageInfo();
         }
         return method.invoke(originalObject, args);
     }

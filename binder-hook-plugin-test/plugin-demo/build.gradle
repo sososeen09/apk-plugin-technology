@@ -1,6 +1,4 @@
 apply plugin: 'com.android.application'
-
-
 apply plugin: "apk.upload.plugin"
 
 buildscript {
@@ -10,7 +8,7 @@ buildscript {
             url 'file:../repositories'
         }
         maven{
-            url 'file:/works/StudioWorkSpace/Personal/apk-plugin-technology/repositories'
+            url "/Users/yunlong/AndroidStudioProjects/myProjects/apk-plugin-technology/repositories"
         }
     }
 
@@ -25,14 +23,14 @@ pluginApkOutputPath{
 
 
 android {
-    compileSdkVersion 21
+    compileSdkVersion 26
 
 
 
     defaultConfig {
         applicationId "com.sososeen09.plugin.demo"
-        minSdkVersion 21
-        targetSdkVersion 21
+        minSdkVersion 19
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
 
@@ -52,7 +50,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'com.android.support:appcompat-v7:21+'
+    implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'

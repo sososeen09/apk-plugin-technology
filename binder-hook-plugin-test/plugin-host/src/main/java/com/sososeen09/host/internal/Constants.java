@@ -9,4 +9,5 @@ public interface Constants {
     String METHOD_GET_ACTIVITY_INFO = "getActivityInfo";
     String EXTRA_REAL_WANTED_INTENT = "real_wanted_intent";
     String METHOD_START_ACTIVITY = "startActivity";
+    String METHOD_GET_PACKAGE_INFO = "getPackageInfo";
 }
