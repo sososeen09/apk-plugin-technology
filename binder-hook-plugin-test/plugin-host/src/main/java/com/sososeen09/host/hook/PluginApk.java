@@ -8,9 +8,14 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.ServiceInfo;
+import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.os.Build;
 
 import com.sososeen09.host.PluginClassLoader;
+import com.sososeen09.host.internal.PluginContext;
+import com.sososeen09.host.utils.PluginUtil;
+import com.sososeen09.host.utils.ReflectUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,8 +33,12 @@ public class PluginApk {
     private Map<ComponentName, ServiceInfo> mServiceInfoMap = new HashMap<>();
     private Application mApplication;
     private PluginManager mPluginManager;
+    private AssetManager mAssetManager;
+    private Context mPluginContext;
+
     public PluginApk(PluginManager pluginManager) {
         this.mPluginManager = pluginManager;
+        mPluginContext = new PluginContext(this);
     }
 
     public PackageInfo getPackageInfo() {
@@ -115,7 +124,36 @@ public class PluginApk {
     }
 
     public Context getPluginContext() {
+        return mPluginContext;
+    }
+
+    public Resources.Theme getTheme() {
+        Resources.Theme theme = this.mResources.newTheme();
+        theme.applyStyle(PluginUtil.selectDefaultTheme(this.mApplicationInfo.theme, Build.VERSION.SDK_INT), false);
+        return theme;
+    }
+
+    public void setTheme(int resid) {
+        try {
+            ReflectUtil.setField(Resources.class, this.mResources, "mThemeResId", resid);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Context getHostContext() {
         return mPluginManager.getContext();
     }
 
+    public AssetManager getAssets() {
+        return mAssetManager;
+    }
+
+    public void setAssetManager(AssetManager assetManager) {
+        this.mAssetManager = assetManager;
+    }
+
+    public Context getApplication() {
+        return mApplication;
+    }
 }

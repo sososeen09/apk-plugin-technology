@@ -81,7 +81,7 @@ public class PluginManager {
             addPathMethod.invoke(assetManager, pluginPath);
 
             pluginApk.setResources(new Resources(assetManager, applicationContext.getResources().getDisplayMetrics(), applicationContext.getResources().getConfiguration()));
-
+            pluginApk.setAssetManager(assetManager);
             PackageManager packageManager = applicationContext.getPackageManager();
             pluginApk.setPackageInfo(packageManager.getPackageArchiveInfo(pluginPath, PackageManager.GET_ACTIVITIES | PackageManager.GET_SERVICES | PackageManager.GET_PROVIDERS));
             parseLoadedApkPlugin(pluginApk, pluginPath);
@@ -93,6 +93,10 @@ public class PluginManager {
 
     public PluginApk getLoadedPlugin(ComponentName componentName) {
         return loadedApk.get(componentName.getPackageName());
+    }
+
+    public PluginApk getLoadedPlugin(String packageName) {
+        return loadedApk.get(packageName);
     }
 
 
