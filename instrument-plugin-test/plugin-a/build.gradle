@@ -1,12 +1,27 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+
+apply plugin: 'kotlin-android-extensions'
+
+
 apply plugin: "apk.upload.plugin"
+
+//task printPatg{
+//    try {
+//        exec {
+//            commandLine pwd
+//        }
+//    }
+//    catch (ignored) {
+//    }
+//
+//
+//}
+
 
 buildscript {
     repositories {
 
-//        maven{
-//            url 'file:../repositories'
-//        }
         maven{
             url "../../repositories"
         }
@@ -22,14 +37,15 @@ pluginApkOutputPath{
 }
 
 
+
 android {
     compileSdkVersion 26
 
 
 
     defaultConfig {
-        applicationId "com.sososeen09.plugin.demo"
-        minSdkVersion 19
+        applicationId "com.sososeen09.plugin.a"
+        minSdkVersion 15
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
@@ -47,6 +63,8 @@ android {
 
 }
 
+
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
@@ -55,4 +73,6 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    implementation project(':plugin-lib')
 }
