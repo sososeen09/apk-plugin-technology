@@ -16,5 +16,9 @@ class SecondActivity : BaseActivity() {
         findViewById<Button>(R.id.btn_service).setOnClickListener {
             startService(Intent(if (that != null) that else this@SecondActivity, MyService::class.java))
         }
+
+        findViewById<Button>(R.id.btn_stop).setOnClickListener {
+            stopService(Intent(if (that != null) that else this@SecondActivity, MyService::class.java))
+        }
     }
 }

@@ -23,6 +23,12 @@
         <activity android:name=".ProxyActivity"/>
         <activity android:name=".HostSecondActivity">
         </activity>
+
+        <service
+            android:name=".ProxyService"
+            android:enabled="true"
+            android:exported="true">
+        </service>
     </application>
 
 </manifest>

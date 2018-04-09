@@ -34,8 +34,6 @@ public class ActivityCallback implements Handler.Callback {
         if (msg.what == LAUNCH_ACTIVITY) {
             handleLaunchActivity(msg);
         }
-
-//            mH.handleMessage(msg);
         return false;
     }
 
@@ -49,7 +47,7 @@ public class ActivityCallback implements Handler.Callback {
             Intent interceptedIntent = (Intent) intentField.get(activityClientRecord);
 
             //包名不一样，把ProxyActivity替换为真正想要跳转的 SecondActivity
-            Intent realWanted = interceptedIntent.getParcelableExtra(Constants.EXTRA_REAL_WANTED_INTENT);
+            Intent realWanted = interceptedIntent.getParcelableExtra(Constants.EXTRA_TARGET);
             if (realWanted != null) {
                 interceptedIntent.setComponent(realWanted.getComponent());
 

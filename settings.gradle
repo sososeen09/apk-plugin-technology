@@ -1,4 +1,4 @@
-include ':apk-upload-help-plugin', ':plugin-host', ':plugin-core_lib'
+include ':apk-upload-help-plugin', ':plugin-host', ':plugin-core_lib', ':AndroidStub'
 include ':gradle-plugin-source-lib'
 include ':binder-hook'
 include ':plugin-demo'

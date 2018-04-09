@@ -21,9 +21,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.sososeen09.host.hook.HookUtils;
-import com.sososeen09.host.utils.PackageUtils;
 import com.sososeen09.host.hook.PluginManager;
+import com.sososeen09.host.utils.PackageUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -48,8 +47,6 @@ public class MainActivity extends AppCompatActivity {
         rv_plugin_apk.setAdapter(pluginAdapter);
 
         PluginManager.init(this);
-        HookUtils hookUtils = new HookUtils();
-        hookUtils.initHook(this);
     }
 
 

@@ -6,8 +6,20 @@ package com.sososeen09.host.internal;
 
 public interface Constants {
     int LAUNCH_ACTIVITY = 100;
+    int CREATE_SERVICE = 114;
+
     String METHOD_GET_ACTIVITY_INFO = "getActivityInfo";
-    String EXTRA_REAL_WANTED_INTENT = "real_wanted_intent";
+    String EXTRA_TARGET = "real_wanted_intent";
     String METHOD_START_ACTIVITY = "startActivity";
     String METHOD_GET_PACKAGE_INFO = "getPackageInfo";
+    String METHOD_START_SERVICE = "startService";
+    String METHOD_STOP_SERVICE="stopService";
+
+
+
+    String EXTRA_COMMAND = "command";
+    int EXTRA_COMMAND_START_SERVICE = 1;
+    int EXTRA_COMMAND_STOP_SERVICE = 2;
+    int EXTRA_COMMAND_BIND_SERVICE = 3;
+    int EXTRA_COMMAND_UNBIND_SERVICE = 4;
 }

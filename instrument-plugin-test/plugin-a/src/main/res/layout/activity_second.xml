@@ -27,4 +27,14 @@
         android:minHeight="50dp"
         android:textAllCaps="false"
         android:text="开启Service"/>
+
+    <Button
+        android:id="@+id/btn_stop"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:gravity="center"
+        android:minHeight="50dp"
+        android:textAllCaps="false"
+        android:text="停止Service"/>
 </LinearLayout>

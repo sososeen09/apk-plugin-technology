@@ -20,5 +20,10 @@ class MyService : BaseService() {
         return super.onStartCommand(intent, flags, startId)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        Toast.makeText(applicationContext,"plugin a service destroy!!!",Toast.LENGTH_SHORT).show()
+    }
+
 }
 
