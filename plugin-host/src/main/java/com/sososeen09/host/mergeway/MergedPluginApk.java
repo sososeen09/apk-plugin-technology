@@ -1,5 +1,6 @@
 package com.sososeen09.host.mergeway;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.res.AssetManager;
@@ -15,7 +16,8 @@ public class MergedPluginApk {
     private Resources mResources;
     private AssetManager mAssetManager;
     private Context mPluginContext;
-
+    private ClassLoader mClassLoader;
+    private Context mApplicationContext;
 
     public MergedPluginApk(MergedPluginHelper mergedPluginHelper) {
         this.mergedPluginHelper = mergedPluginHelper;
@@ -53,5 +55,21 @@ public class MergedPluginApk {
 
     public void setAssetManager(AssetManager assetManager) {
         this.mAssetManager = assetManager;
+    }
+
+    public Context getApplicationContext() {
+        return mApplicationContext;
+    }
+
+    public void setApplicationContext(Context application) {
+        mApplicationContext = application;
+    }
+
+    public void setClassLoader(ClassLoader classLoader) {
+        mClassLoader = classLoader;
+    }
+
+    public ClassLoader getClassLoader() {
+        return mClassLoader;
     }
 }

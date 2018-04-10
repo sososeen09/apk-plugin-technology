@@ -1,6 +1,7 @@
 package com.sososeen09.host.hook;
 
 import android.app.IActivityManager;
+import android.app.Instrumentation;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
@@ -8,6 +9,8 @@ import android.os.Handler;
 import com.sososeen09.host.delegate.ActivityCallback;
 import com.sososeen09.host.delegate.IActivityManagerProxy;
 import com.sososeen09.host.delegate.IPackageManagerProxy;
+import com.sososeen09.host.mergeway.PluginInstrumentation;
+import com.sososeen09.host.utils.ReflectUtil;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
@@ -121,6 +124,21 @@ public class HookHelper {
             mCallbackField.setAccessible(true);
             mCallbackField.set(mHObj, new ActivityCallback(applicationContext, mHObj));
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void hookInstrumentation() {
+        try {
+            Instrumentation baseInstrumentation = ReflectUtil.getInstrumentation(applicationContext);
+            if (baseInstrumentation.getClass().getName().contains("lbe")) {
+                // reject executing in paralell space, for example, lbe.
+                System.exit(0);
+            }
+            final PluginInstrumentation instrumentation = new PluginInstrumentation(baseInstrumentation);
+            Object activityThread = ReflectUtil.getActivityThread(applicationContext);
+            ReflectUtil.setInstrumentation(activityThread, instrumentation);
         } catch (Exception e) {
             e.printStackTrace();
         }

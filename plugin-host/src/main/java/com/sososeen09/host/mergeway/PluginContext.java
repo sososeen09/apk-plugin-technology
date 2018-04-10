@@ -19,7 +19,7 @@ public class PluginContext extends ContextWrapper {
 
     @Override
     public Context getApplicationContext() {
-        return this.mPluginApk.getApplication();
+        return this.mPluginApk.getApplicationContext();
     }
 
     @Override

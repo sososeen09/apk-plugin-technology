@@ -34,6 +34,7 @@ public class MergedPluginHelper {
 
     private MergedPluginHelper() {
         HookHelper.initHook(applicationContext);
+        HookHelper.hookInstrumentation();
     }
 
     public static MergedPluginHelper getInstance() {
@@ -86,7 +87,8 @@ public class MergedPluginHelper {
 
             pluginApk.setAssetManager(pluginAssetManager);
             pluginApk.setResources(pluginResource);
-
+            pluginApk.setClassLoader(pluginClassLoader);
+            pluginApk.setApplicationContext(applicationContext);
             PackageManager packageManager = applicationContext.getPackageManager();
             pluginApk.setPackageInfo(packageManager.getPackageArchiveInfo(pluginPath, PackageManager.GET_ACTIVITIES | PackageManager.GET_SERVICES | PackageManager.GET_PROVIDERS));
 
@@ -100,5 +102,10 @@ public class MergedPluginHelper {
 
     public Context getContext() {
         return applicationContext;
+    }
+
+    public MergedPluginApk getMergedPluginApk(String packageName) {
+
+        return loadedApk.get(packageName);
     }
 }
