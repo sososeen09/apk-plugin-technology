@@ -12,7 +12,6 @@ project(':app').projectDir = new File('instrument-plugin-test/app')
 project(':plugin-lib').projectDir = new File('instrument-plugin-test/plugin-lib')
 
 //Hook方式
-project(':binder-hook').projectDir = new File('binder-hook-plugin-test/binder-hook')
 project(':plugin-host').projectDir = new File('binder-hook-plugin-test/plugin-host')
 project(':plugin-core_lib').projectDir = new File('binder-hook-plugin-test/plugin-core_lib')
 
