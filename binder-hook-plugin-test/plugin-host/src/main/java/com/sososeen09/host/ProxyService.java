@@ -73,7 +73,7 @@ public class ProxyService extends Service {
                         IBinder token = appThread.asBinder();
                         Application app = pluginApk.makeApplication();
                         IActivityManager am = mPluginManager.getActivityManager();
-                        attach.invoke(service, pluginApk.getPluginContext(), mainThread, component.getClassName(), token, app, am);
+                        attach.invoke(service, pluginApk.getHostContext(), mainThread, component.getClassName(), token, app, am);
                         service.onCreate();
                         this.mPluginManager.getComponentsHandler().rememberService(component, service);
                     } catch (Throwable t) {

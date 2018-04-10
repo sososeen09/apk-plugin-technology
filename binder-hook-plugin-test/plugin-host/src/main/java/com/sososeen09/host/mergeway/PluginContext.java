@@ -1,20 +1,18 @@
-package com.sososeen09.host.internal;
+package com.sososeen09.host.mergeway;
 
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 
-import com.sososeen09.host.hook.PluginApk;
-
 /**
  * Created by yunlong.su on 2018/4/9.
  */
 
 public class PluginContext extends ContextWrapper {
-    private final PluginApk mPluginApk;
+    private final MergedPluginApk mPluginApk;
 
-    public PluginContext(PluginApk pluginApk) {
+    public PluginContext(MergedPluginApk pluginApk) {
         super(pluginApk.getHostContext());
         this.mPluginApk = pluginApk;
     }
@@ -40,8 +38,8 @@ public class PluginContext extends ContextWrapper {
         return this.mPluginApk.getAssets();
     }
 
-    @Override
-    public Resources.Theme getTheme() {
-        return this.mPluginApk.getTheme();
-    }
+//    @Override
+//    public Resources.Theme getTheme() {
+//        return this.mPluginApk.getTheme();
+//    }
 }

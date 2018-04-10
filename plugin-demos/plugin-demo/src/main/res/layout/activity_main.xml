@@ -11,4 +11,9 @@
         android:layout_height="wrap_content"
         android:text="Hello World!"/>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="this is plugin demo"/>
+
 </LinearLayout>

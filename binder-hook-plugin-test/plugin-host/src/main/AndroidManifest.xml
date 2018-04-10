@@ -13,6 +13,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -20,6 +21,9 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <activity android:name=".HookLoadedApkActivity"/>
+        <activity android:name=".mergeway.MergeClassLoaderActivity"/>
         <activity android:name=".ProxyActivity"/>
         <activity android:name=".HostSecondActivity">
         </activity>
@@ -29,6 +33,8 @@
             android:enabled="true"
             android:exported="true">
         </service>
+
+
     </application>
 
 </manifest>
