@@ -1,6 +1,7 @@
 package com.sososeen09.host.mergeway;
 
 import android.content.Context;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -33,7 +34,15 @@ public class MergedPluginHelper {
     }
 
     private MergedPluginHelper() {
-        HookHelper.initHook(applicationContext);
+        try {
+            HookHelper.initHook(applicationContext);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
         HookHelper.hookInstrumentation();
     }
 
@@ -46,22 +55,33 @@ public class MergedPluginHelper {
 
     public void mergePlugin(String pluginPath) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException, NoSuchFieldException {
 
-        // 融合ClassLoader，插件中的dex插入到速度Element数组的前部
-        PathClassLoader pathClassLoader = (PathClassLoader) MergedPluginHelper.class.getClassLoader();
-        File dexOptFile = applicationContext.getDir("dex", Context.MODE_PRIVATE);
-        PluginClassLoader pluginClassLoader = new PluginClassLoader(pluginPath, dexOptFile.getAbsolutePath(), null, applicationContext.getClassLoader());
+        PackageManager packageManager = applicationContext.getPackageManager();
+        PackageInfo packageArchiveInfo = packageManager.getPackageArchiveInfo(pluginPath, PackageManager.GET_ACTIVITIES | PackageManager.GET_SERVICES | PackageManager.GET_PROVIDERS);
 
-        ReflectUtil.mergeClassLoader(pathClassLoader, pluginClassLoader);
+        MergedPluginApk pluginApk = loadedApk.get(packageArchiveInfo.packageName);
+        if (pluginApk == null) {
+            pluginApk = new MergedPluginApk(this);
+
+            // 融合ClassLoader，插件中的dex插入到速度Element数组的前部
+            PathClassLoader pathClassLoader = (PathClassLoader) MergedPluginHelper.class.getClassLoader();
+            File dexOptDir = applicationContext.getDir("dex", Context.MODE_PRIVATE);
+            File dexOptFile = new File(dexOptDir, packageArchiveInfo.packageName);
+            if (!dexOptFile.exists()) {
+                dexOptFile.mkdirs();
+            }
+            PluginClassLoader pluginClassLoader = new PluginClassLoader(pluginPath, dexOptFile.getAbsolutePath(), null, applicationContext.getClassLoader());
+
+            ReflectUtil.mergeClassLoader(pathClassLoader, pluginClassLoader);
 
 
-        AssetManager pluginAssetManager = AssetManager.class.newInstance();
-        Method addAssetPathMethod = pluginAssetManager.getClass().getDeclaredMethod("addAssetPath", String.class);
-        addAssetPathMethod.setAccessible(true);
-        addAssetPathMethod.invoke(pluginAssetManager, pluginPath);
+            AssetManager pluginAssetManager = AssetManager.class.newInstance();
+            Method addAssetPathMethod = pluginAssetManager.getClass().getDeclaredMethod("addAssetPath", String.class);
+            addAssetPathMethod.setAccessible(true);
+            addAssetPathMethod.invoke(pluginAssetManager, pluginPath);
 //        手动实例化
-        Method ensureStringBlocks = AssetManager.class.getDeclaredMethod("ensureStringBlocks");
-        ensureStringBlocks.setAccessible(true);
-        ensureStringBlocks.invoke(pluginAssetManager);
+            Method ensureStringBlocks = AssetManager.class.getDeclaredMethod("ensureStringBlocks");
+            ensureStringBlocks.setAccessible(true);
+            ensureStringBlocks.invoke(pluginAssetManager);
 
 //        // 为什么不能把插件的资源融合到宿主中呢？
 //
@@ -76,27 +96,18 @@ public class MergedPluginHelper {
 //
 
 //            插件的StringBloac被实例化了
-        Resources supResource = applicationContext.getResources();
-        Resources pluginResource = new Resources(pluginAssetManager, supResource.getDisplayMetrics(), supResource.getConfiguration());
-
-
-        MergedPluginApk pluginApk = loadedApk.get(pluginPath);
-        if (pluginApk == null) {
-            pluginApk = new MergedPluginApk(this);
-
+            Resources supResource = applicationContext.getResources();
+            PluginResources pluginResource = new PluginResources(pluginAssetManager, supResource.getDisplayMetrics(), supResource.getConfiguration());
 
             pluginApk.setAssetManager(pluginAssetManager);
             pluginApk.setResources(pluginResource);
             pluginApk.setClassLoader(pluginClassLoader);
             pluginApk.setApplicationContext(applicationContext);
-            PackageManager packageManager = applicationContext.getPackageManager();
-            pluginApk.setPackageInfo(packageManager.getPackageArchiveInfo(pluginPath, PackageManager.GET_ACTIVITIES | PackageManager.GET_SERVICES | PackageManager.GET_PROVIDERS));
+            pluginApk.setPackageInfo(packageArchiveInfo);
 
             loadedApk.put(pluginApk.getPackageInfo().packageName, pluginApk);
 
         }
-//        HookHelper.hookPluginAssetAndResources(pluginAssetManager, pluginResource);
-
 
     }
 

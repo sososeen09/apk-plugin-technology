@@ -22,8 +22,10 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".HookLoadedApkActivity"/>
-        <activity android:name=".mergeway.MergeClassLoaderActivity"/>
+        <activity
+            android:name=".HookLoadedApkActivity"/>
+        <activity
+            android:name=".mergeway.MergeClassLoaderActivity"/>
         <activity android:name=".ProxyActivity"/>
         <activity android:name=".HostSecondActivity">
         </activity>

@@ -7,6 +7,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.content.res.AssetManager;
@@ -50,7 +51,15 @@ public class PluginManager {
         mServiceHandler = new ServiceHandler();
         mInstrumentation = ReflectUtil.getInstrumentation(applicationContext);
 
-        HookHelper.initHook(applicationContext);
+        try {
+            HookHelper.initHook(applicationContext);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     public static PluginManager getInstance() {
@@ -65,8 +74,14 @@ public class PluginManager {
         if (pluginApk == null) {
             pluginApk = new PluginApk(this);
 
+            PackageManager packageManager = applicationContext.getPackageManager();
+            PackageInfo packageArchiveInfo = packageManager.getPackageArchiveInfo(pluginPath, PackageManager.GET_ACTIVITIES | PackageManager.GET_SERVICES | PackageManager.GET_PROVIDERS);
 
-            File dexOptFile = applicationContext.getDir("dex", Context.MODE_PRIVATE);
+            File dexOptDir = applicationContext.getDir("dex", Context.MODE_PRIVATE);
+            File dexOptFile = new File(dexOptDir, packageArchiveInfo.packageName);
+            if (!dexOptFile.exists()) {
+                dexOptFile.mkdirs();
+            }
             pluginApk.setClassLoader(new PluginClassLoader(pluginPath, dexOptFile.getAbsolutePath(), null, applicationContext.getClassLoader()));
 
             AssetManager assetManager = AssetManager.class.newInstance();
@@ -77,8 +92,8 @@ public class PluginManager {
 
             pluginApk.setResources(new Resources(assetManager, applicationContext.getResources().getDisplayMetrics(), applicationContext.getResources().getConfiguration()));
             pluginApk.setAssetManager(assetManager);
-            PackageManager packageManager = applicationContext.getPackageManager();
-            pluginApk.setPackageInfo(packageManager.getPackageArchiveInfo(pluginPath, PackageManager.GET_ACTIVITIES | PackageManager.GET_SERVICES | PackageManager.GET_PROVIDERS));
+
+            pluginApk.setPackageInfo(packageArchiveInfo);
             parseLoadedApkPlugin(pluginApk, pluginPath);
 
             loadedApk.put(pluginApk.getPackageInfo().packageName, pluginApk);
