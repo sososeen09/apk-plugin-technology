@@ -16,4 +16,19 @@
         android:layout_height="wrap_content"
         android:text="this is plugin demo"/>
 
+    <Button
+        android:layout_width="wrap_content"
+        android:text="register BroadcastReceiver"
+        android:textAllCaps="false"
+        android:onClick="register"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:text="send broadcast"
+        android:layout_marginTop="10dp"
+        android:onClick="send"
+        android:textAllCaps="false"
+        android:layout_height="wrap_content"/>
+
 </LinearLayout>
