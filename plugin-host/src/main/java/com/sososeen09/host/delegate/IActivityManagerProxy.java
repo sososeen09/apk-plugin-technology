@@ -32,39 +32,50 @@ public class IActivityManagerProxy implements InvocationHandler {
         LogUtils.d("method:" + method.getName() + " called with args:" + Arrays.toString(args));
         //如果是startActivity方法，需要做一些手脚
         if (Constants.METHOD_START_ACTIVITY.equals(method.getName())) {
-            Intent newIntent = null;
-            int index = 0;
-            for (int i = 0; i < args.length; i++) {
-                Object arg = args[i];
-                if (arg instanceof Intent) {
-                    Intent wantedIntent = (Intent) arg;
-
-                    // 需要知道想要启动的Activity是宿主的，还是插件的,如果是宿主的，不用管
-                    if (((Intent) arg).getComponent().getPackageName().equals(context.getPackageName())) {
-                        break;
-                    }
-                    // 加入目标Activity没有在清单文件中注册，我们就欺骗ActivityManagerService，启动一个代理页面
-                    // 真正启动页面，会开始回调ActivityThread的ha.ndleLaunchActivity方法
-                    // 调用这个方法前可以做点文章，启动我们想要启动的页面
-                    newIntent = new Intent();
-                    ComponentName componentName = new ComponentName(context, ProxyActivity.class);
-                    newIntent.setComponent(componentName);
-
-                    //把原始的跳转信息当作参数携带给代理类
-                    newIntent.putExtra(Constants.EXTRA_TARGET, wantedIntent);
-                    index = i;
-                }
-            }
-
-            args[index] = newIntent;
-            return method.invoke(originalObject, args);
+            return handleStartActivity(method, args);
         } else if (Constants.METHOD_START_SERVICE.equals(method.getName())) {
             return handleStartServiceMethod(proxy, method, args);
         } else if (Constants.METHOD_STOP_SERVICE.equals(method.getName())) {
             return handleStopServiceMethod(proxy, method, args);
+        } else if (Constants.METHOD_REGISTER_RECEIVER.equals(method.getName())) {
+            return handleRegisterReceiverMethod(proxy, method, args);
         }
 
         return method.invoke(originalObject, args);
+    }
+
+    private Object handleStartActivity(Method method, Object[] args) throws IllegalAccessException, InvocationTargetException {
+        Intent newIntent = null;
+        int index = 0;
+        for (int i = 0; i < args.length; i++) {
+            Object arg = args[i];
+            if (arg instanceof Intent) {
+                Intent wantedIntent = (Intent) arg;
+
+                // 需要知道想要启动的Activity是宿主的，还是插件的,如果是宿主的，不用管
+                if (((Intent) arg).getComponent().getPackageName().equals(context.getPackageName())) {
+                    break;
+                }
+                // 加入目标Activity没有在清单文件中注册，我们就欺骗ActivityManagerService，启动一个代理页面
+                // 真正启动页面，会开始回调ActivityThread的ha.ndleLaunchActivity方法
+                // 调用这个方法前可以做点文章，启动我们想要启动的页面
+                newIntent = new Intent();
+                ComponentName componentName = new ComponentName(context, ProxyActivity.class);
+                newIntent.setComponent(componentName);
+
+                //把原始的跳转信息当作参数携带给代理类
+                newIntent.putExtra(Constants.EXTRA_TARGET, wantedIntent);
+                index = i;
+            }
+        }
+
+        args[index] = newIntent;
+        return method.invoke(originalObject, args);
+    }
+
+    private Object handleRegisterReceiverMethod(Object proxy, Method method, Object[] args) {
+        //TODO HOOK registerReceiver  方法
+        return null;
     }
 
     private Object handleStopServiceMethod(Object proxy, Method method, Object[] args) throws InvocationTargetException, IllegalAccessException {
